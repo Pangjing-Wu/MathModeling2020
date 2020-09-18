@@ -5,13 +5,10 @@ import matplotlib.pyplot as plt
 
 file = ['./data/vedio/vedio%s.png' % (i+1) for i in range(3)]
 
-
-
 fig, ax = plt.subplots(5, 3, sharex=True, sharey=True, figsize=(7, 9))
 
 for i in range(3):
-    img = plt.imread(file[i])
-    img = 0.2126 * img[:,:,0] + 0.7152 * img[:,:,1] + 0.0722 * img[:,:,2]
+    img = cv2.imread(file[i], cv2.IMREAD_GRAYSCALE)
     ax[0,i].imshow(img,'gray')
     ax[0,i].set_title('original')
 
