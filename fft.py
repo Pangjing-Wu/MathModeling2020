@@ -16,7 +16,7 @@ for i in range(3):
     fshift = np.fft.fftshift(dft)
     log_fft2 = np.log(cv2.magnitude(dft[:,:,0], dft[:,:,1]))
     ax[1,i].imshow(log_fft2, 'Blues')
-    ax[1,i].set_title('log_fft2')
+    ax[1,i].set_title('log fft')
 
     shift2center = np.fft.fftshift(dft)
     log_shift2center = np.log(cv2.magnitude(shift2center[:,:,0], shift2center[:,:,1]))
