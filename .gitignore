@@ -1,5 +1,5 @@
 __pycache__
 .vscode
 .DS_Store
-data/snapshot
+data/highway-snapshot
 fig
