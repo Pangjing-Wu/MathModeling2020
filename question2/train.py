@@ -1,11 +1,20 @@
 import os
 import tqdm
 import torch
-# import video_dataset
 import img_dataset
+import numpy as np
 from model import ResNet18Rnn
 from torch.utils.tensorboard import SummaryWriter
 from argparse import ArgumentParser
+
+
+def fix_seed(seed):
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(seed)
+
+    return True
 
 
 def get_dataset(img_pt, mode='train', bs=8):
@@ -19,8 +28,9 @@ def get_dataset(img_pt, mode='train', bs=8):
 
 
 def main(params):
-    epochs = 10
+    fix_seed(params['seed'])
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     if params['trans'] == 'normal':
         ds_pt = "./dataset_normal"
     elif params['trans'] == 'fft':
@@ -45,7 +55,7 @@ def main(params):
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     writer = SummaryWriter(log_dir)
 
-    for e in range(epochs):
+    for e in range(params['epochs']):
         print()
         print(f"[ INFO ] No.{e} epoch:")
         # Train
@@ -98,10 +108,15 @@ def param_loader():
     parser.add_argument("--pretrained", type=bool, default=True)
     parser.add_argument("--rnn_hidden_size", type=int, default=256)
     parser.add_argument("--rnn_num_layers", type=int, default=1)
+    parser.add_argument("--epochs", type=int, default=10)
 
     # Dataset type
     parser.add_argument("--trans", choices=['normal', 'color_map', 'fft'],
                         help="Select which dataset to use")
+
+    # Reproducibility
+    parser.add_argument("--seed", type=int, default=666)
+
     args, _ = parser.parse_known_args()
 
     return vars(args)
