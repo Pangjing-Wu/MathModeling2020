@@ -49,7 +49,6 @@ def main(params):
     # Model
     model = ResNet18Rnn(params)
     model = model.to(device)
-    model.train()
 
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -59,6 +58,7 @@ def main(params):
         print()
         print(f"[ INFO ] No.{e} epoch:")
         # Train
+        model.train()
         running_size, running_loss = 0, 0
         t_pbar = tqdm.tqdm(train_dl)
         for i, (intervals, labels) in enumerate(t_pbar):
@@ -81,6 +81,7 @@ def main(params):
             writer.add_scalar('Train/avg_loss', avg_loss, len(t_pbar)*e+i)
 
         # Val
+        model.eval()
         running_size, running_loss = 0, 0
         v_pbar = tqdm.tqdm(val_dl)
         for i, (intervals, labels) in enumerate(v_pbar):
