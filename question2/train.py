@@ -41,6 +41,7 @@ def main(params):
         ds_pt = ["./dataset_normal", "./dataset_fft", "./dataset_color_map"]
     else:
         raise KeyError("Choose a dataset type!")
+    print()
     print(f"[ INFO ] Using {params['trans']} dataset")
 
     log_dir = "./log"
@@ -63,7 +64,6 @@ def main(params):
     writer = SummaryWriter(log_dir)
 
     for e in range(params['epochs']):
-        print()
         print(f"[ INFO ] No.{e} epoch:")
         # Train
         model.train()
@@ -107,16 +107,17 @@ def main(params):
             writer.add_scalar('Val/avg_loss', avg_loss, len(v_pbar)*e+i)
         print("[ INFO ] MOR pred: ",
               [f'{n:.2f}' for n in
-               (outputs[:, 0] * train_ds.mor_range).tolist()])
+               (torch.pow(10, outputs[:5, 0])).tolist()])
         print("         MOR gt  : ",
               [f'{n:.2f}' for n in
-               (labels[:, 0] * train_ds.mor_range).tolist()])
+               (torch.pow(10, labels[:5, 0])).tolist()])
         print("[ INFO ] RVR pred: ",
               [f'{n:.2f}' for n in
-               (outputs[:, 0] * train_ds.rvr_range).tolist()])
+               (torch.pow(10, outputs[:5, 1])).tolist()])
         print("         RVR gt  : ",
               [f'{n:.2f}' for n in
-               (labels[:, 0] * train_ds.rvr_range).tolist()])
+               (torch.pow(10, labels[:5, 1])).tolist()])
+        print()
 
 
 def param_loader():
@@ -138,7 +139,7 @@ def param_loader():
     parser.add_argument("--bs", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--img_size", type=int, default=224)
-    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--lr", type=float, default=1e-3)
 
     # Reproducibility
     parser.add_argument("--seed", type=int, default=666)

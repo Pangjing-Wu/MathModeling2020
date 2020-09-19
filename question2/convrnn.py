@@ -48,7 +48,7 @@ class ConvRnn(nn.Module):
         out = self.fc1(out)
         out = self.dropout(out)
         out = self.fc2(out)
-        out = self.clipper(out)
+        # out = self.clipper(out)
         return out
 
     def base_forward(self, inp):

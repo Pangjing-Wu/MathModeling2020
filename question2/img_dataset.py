@@ -2,6 +2,7 @@ import os
 import torch
 import random
 import pandas as pd
+import numpy as np
 from PIL import Image
 import torchvision.transforms as trans
 
@@ -46,8 +47,8 @@ class VidDataset(torch.utils.data.Dataset):
             video_interval = self.get_mix_interval(self.file_list[index])
         else:
             video_interval = self.get_one_interval(self.file_list[index])
-        mor = self.dataframe.MOR_1A.iloc[index] / self.mor_range
-        rvr = self.dataframe.RVR_1A.iloc[index] / self.rvr_range
+        mor = np.log10(self.dataframe.MOR_1A.iloc[index]+1)
+        rvr = np.log10(self.dataframe.RVR_1A.iloc[index]+1)
         labels = torch.FloatTensor((mor, rvr))
         return video_interval, labels
 
