@@ -24,7 +24,7 @@ def get_dataset(img_pt, mode='train', bs=8):
     dataloader = torch.utils.data.DataLoader(
                     dataset, batch_size=bs, shuffle=True, num_workers=4)
 
-    return dataloader
+    return dataset, dataloader
 
 
 def main(params):
@@ -43,15 +43,14 @@ def main(params):
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
 
-    train_dl = get_dataset(ds_pt, mode='train', bs=8)
-    val_dl = get_dataset(ds_pt, mode='val', bs=8)
+    train_ds, train_dl = get_dataset(ds_pt, mode='train', bs=8)
+    val_ds, val_dl = get_dataset(ds_pt, mode='val', bs=8)
 
     # Model
-    model = ResNet18Rnn(params)
-    model = model.to(device)
+    model = ResNet18Rnn(params).to(device)
 
     criterion = torch.nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=params['lr'])
     writer = SummaryWriter(log_dir)
 
     for e in range(params['epochs']):
@@ -97,8 +96,18 @@ def main(params):
             v_pbar.set_postfix(avg_loss=avg_loss.item())
             writer.add_scalar('Val/loss', loss, len(v_pbar)*e+i)
             writer.add_scalar('Val/avg_loss', avg_loss, len(v_pbar)*e+i)
-        print(outputs)
-        print(labels)
+        print("[ INFO ] MOR pred: ",
+              [f'{n:.2f}' for n in
+               (outputs[:, 0] * train_ds.mor_range).tolist()])
+        print("         MOR gt  : ",
+              [f'{n:.2f}' for n in
+               (labels[:, 0] * train_ds.mor_range).tolist()])
+        print("[ INFO ] RVR pred: ",
+              [f'{n:.2f}' for n in
+               (outputs[:, 0] * train_ds.rvr_range).tolist()])
+        print("         RVR gt  : ",
+              [f'{n:.2f}' for n in
+               (labels[:, 0] * train_ds.rvr_range).tolist()])
 
 
 def param_loader():
@@ -109,11 +118,14 @@ def param_loader():
     parser.add_argument("--pretrained", type=bool, default=True)
     parser.add_argument("--rnn_hidden_size", type=int, default=256)
     parser.add_argument("--rnn_num_layers", type=int, default=1)
-    parser.add_argument("--epochs", type=int, default=10)
 
     # Dataset type
     parser.add_argument("--trans", choices=['normal', 'color_map', 'fft'],
                         help="Select which dataset to use")
+
+    # Hyperparameter
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--lr", type=float, default=1e-4)
 
     # Reproducibility
     parser.add_argument("--seed", type=int, default=666)
