@@ -5,6 +5,9 @@ import numpy as np
 H = 720
 W = 1280
 
+road_l_fence_a = 11.443
+road_l_fence_b = -3160.5
+
 road_l_side_l_a = 2.4062
 road_l_side_l_b = -431.22
 
@@ -26,8 +29,8 @@ road_r_line_l_b = 129.45
 road_r_line_r_a = 0.5351
 road_r_line_r_b = 121.84
 
-list_a = [road_l_side_l_a, road_l_side_r_a, road_l_line_l_a, road_l_line_r_a, road_r_side_r_a, road_r_line_l_a, road_r_line_r_a]
-list_b = [road_l_side_l_b, road_l_side_r_b, road_l_line_l_b, road_l_line_r_b, road_r_side_r_b, road_r_line_l_b, road_r_line_r_b]
+list_a = [road_l_fence_a, road_l_side_l_a, road_l_side_r_a, road_l_line_l_a, road_l_line_r_a, road_r_side_r_a, road_r_line_l_a, road_r_line_r_a]
+list_b = [road_l_fence_b, road_l_side_l_b, road_l_side_r_b, road_l_line_l_b, road_l_line_r_b, road_r_side_r_b, road_r_line_l_b, road_r_line_r_b]
 
 
 def line_point(a, b):
@@ -54,11 +57,11 @@ def line_point(a, b):
     return (x1, y1), (x2, y2)
 
 
-file = './data/highway-snapshot/original_frame100.bmp'
-img = cv2.imread(file)
-# img = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
-# img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+file = './fig/original_frame100-canny.bmp'
+# img = cv2.imread(file)
+img = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
+img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
 for a, b in zip(list_a, list_b):
     img = cv2.line(img, *line_point(a, b), color=(0, 255, 0), lineType=4)
-cv2.imwrite('./fig/original_frame100-drawroad.bmp', img)
+cv2.imwrite('./fig/original_frame100-canny-drawroad.bmp', img)
