@@ -34,7 +34,8 @@ class VidDataset(torch.utils.data.Dataset):
 
         self.trans = transform_func(mode, img_size)
         train_list, val_list = self.split_dataset(len(self.dataframe), 0.8)
-        self.file_list = train_list if mode == 'train' else val_list
+        # self.file_list = train_list if mode == 'train' else val_list
+        self.file_list = list(range(1915))
 
     def __getitem__(self, index):
         video_interval = self.get_one_interval(self.file_list[index])
