@@ -11,22 +11,26 @@ def transform_func(mode, img_size):
     if mode == 'train':
         # TODO Add others helpful augmentation for training
         return trans.Compose([
+                trans.CenterCrop((640, 640)),
                 trans.Resize(resize_size),
                 trans.CenterCrop(img_size),
                 trans.ToTensor(),
-                trans.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+                trans.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
     else:
         return trans.Compose([
+                trans.CenterCrop((640, 640)),
                 trans.Resize(resize_size),
                 trans.CenterCrop(img_size),
                 trans.ToTensor(),
-                trans.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+                trans.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 
 class VidDataset(torch.utils.data.Dataset):
-    def __init__(self, img_pt, csv_pt, mode='train', img_size=(224, 224)):
+    def __init__(self, img_pt, csv_pt, base,
+                 mode='train', img_size=(224, 224)):
         super(VidDataset, self).__init__()
         self.img_pt = img_pt
+        self.base = base
 
         self.dataframe = self.get_dataframe_match_video(csv_pt)
         self.mor_range = self.dataframe.MOR_1A.max()
@@ -38,7 +42,10 @@ class VidDataset(torch.utils.data.Dataset):
         self.file_list = list(range(1915))
 
     def __getitem__(self, index):
-        video_interval = self.get_one_interval(self.file_list[index])
+        if self.base == 'visnet':
+            video_interval = self.get_mix_interval(self.file_list[index])
+        else:
+            video_interval = self.get_one_interval(self.file_list[index])
         mor = self.dataframe.MOR_1A.iloc[index] / self.mor_range
         rvr = self.dataframe.RVR_1A.iloc[index] / self.rvr_range
         labels = torch.FloatTensor((mor, rvr))
@@ -53,6 +60,17 @@ class VidDataset(torch.utils.data.Dataset):
             img = Image.open(os.path.join(self.img_pt, f'{idx}_{n}.png'))
             img = self.trans(img)
             interval.append(img)
+        return torch.stack(interval)
+
+    def get_mix_interval(self, idx):
+        interval = list()
+        for n in range(15):
+            trans_imgs = list()
+            for pt in self.img_pt:
+                img = Image.open(os.path.join(pt, f'{idx}_{n}.png'))
+                img = self.trans(img)
+                trans_imgs.append(img)
+            interval.append(torch.stack(trans_imgs))
         return torch.stack(interval)
 
     def get_dataframe_match_video(self, pt, start=3840, end=-1):
