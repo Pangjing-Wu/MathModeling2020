@@ -72,7 +72,9 @@ def main(params):
         for i, (intervals, labels) in enumerate(t_pbar):
             intervals, labels = intervals.to(device), labels.to(device)
             outputs = model(intervals)
-            loss = criterion(outputs, labels)
+            loss_mor = criterion(outputs[:, 0], labels[:, 0])
+            loss_rvr = criterion(outputs[:, 1], labels[:, 1])
+            loss = loss_mor + loss_rvr
 
             # Update model
             model.zero_grad()
@@ -96,7 +98,9 @@ def main(params):
             intervals, labels = intervals.to(device), labels.to(device)
             with torch.no_grad():
                 outputs = model(intervals)
-                loss = criterion(outputs, labels)
+                loss_mor = criterion(outputs[:, 0], labels[:, 0])
+                loss_rvr = criterion(outputs[:, 1], labels[:, 1])
+                loss = loss_mor + loss_rvr
 
                 running_size += intervals.size(0)
                 running_loss += loss
@@ -106,17 +110,17 @@ def main(params):
             writer.add_scalar('Val/loss', loss, len(v_pbar)*e+i)
             writer.add_scalar('Val/avg_loss', avg_loss, len(v_pbar)*e+i)
         print("[ INFO ] MOR pred: ",
-              [f'{n:.2f}' for n in
-               (torch.pow(10, outputs[:5, 0])).tolist()])
+              [f'{n-1:.2f}' for n in
+               torch.pow(10, outputs[:5, 0]).tolist()])
         print("         MOR gt  : ",
-              [f'{n:.2f}' for n in
-               (torch.pow(10, labels[:5, 0])).tolist()])
+              [f'{n-1:.2f}' for n in
+               torch.pow(10, labels[:5, 0]).tolist()])
         print("[ INFO ] RVR pred: ",
-              [f'{n:.2f}' for n in
-               (torch.pow(10, outputs[:5, 1])).tolist()])
+              [f'{n-1:.2f}' for n in
+               torch.pow(10, outputs[:5, 1]).tolist()])
         print("         RVR gt  : ",
-              [f'{n:.2f}' for n in
-               (torch.pow(10, labels[:5, 1])).tolist()])
+              [f'{n-1:.2f}' for n in
+               torch.pow(10, labels[:5, 1]).tolist()])
         print()
 
 
