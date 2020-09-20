@@ -23,5 +23,4 @@ if __name__ == '__main__':
         tl, tr = [316, 499], [520, 476]
         bl, br = [335, 719], [748, 673]
         img = perspective_transform(img, tl, tr, br ,bl)
-        print(img)
         cv2.imwrite('./fig/task3-trans/original_frame%s-trans.bmp' % f, img)
