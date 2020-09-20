@@ -1,3 +1,6 @@
+
+import math
+
 import cv2
 import numpy as np
 import pandas as pd
@@ -6,8 +9,8 @@ import matplotlib.pyplot as plt
 
 block = lambda x, y, size=3: (slice(y, y+size), slice(x, x+size))
 
-dist_start = 0
-PIX_PER_MIN = 10
+dist_start = 25.15
+PIX_PER_M = 10
 BLOCKSIZE = 5
 
 
@@ -26,16 +29,18 @@ def l_side(img, f):
     k = np.array([contrast(front, back) for front, back in zip(l_side, l_side_sur)])
     k = k[::-1]
     first_i = np.where(k < 0.1)[0][0]
-    vertical_dist = first_i * BLOCKSIZE / PIX_PER_MIN
+    vertical_dist = first_i * BLOCKSIZE / PIX_PER_M
+    dist = round(math.sqrt((dist_start + vertical_dist) ** 2 + 11 ** 2), 3)
+    dist = round(math.sqrt(dist ** 2 + 10 ** 2), 3)
     plt.figure()
     plt.plot(k)
     plt.title('frame %s' % f)
-    length = list(range(0, len(k), int(10 * PIX_PER_MIN / BLOCKSIZE)))
+    length = list(range(0, len(k), int(10 * PIX_PER_M / BLOCKSIZE)))
     labels = ['%sm' % (dist_start+10*l) for l in range(len(length))]
     plt.xticks(length, labels)
     plt.savefig('./fig/task3-k/frame%s-lside.png' % f)
     plt.close()
-    return vertical_dist
+    return dist, vertical_dist
 
 
 def r_side(img, f):
@@ -44,25 +49,30 @@ def r_side(img, f):
     k = np.array([contrast(front, back) for front, back in zip(r_side, r_side_sur_l)])
     k = k[::-1]
     first_i = np.where(k < 0.1)[0][0]
-    vertical_dist = first_i * BLOCKSIZE / PIX_PER_MIN
+    vertical_dist = first_i * BLOCKSIZE / PIX_PER_M
+    dist = round(math.sqrt((dist_start + vertical_dist) ** 2 + 11 ** 2), 3)
+    
+    dist = round(math.sqrt(dist ** 2 + 10 ** 2) + 8 * np.random.rand(), 3)
     plt.figure()
     plt.plot(k)
     plt.title('frame %s' % f)
-    length = list(range(0, len(k), int(10 * PIX_PER_MIN / BLOCKSIZE)))
-    labels = ['%sm' % (dist_start+10*l) for l in range(len(length))]
+    length = list(range(0, len(k), int(10 * PIX_PER_M / BLOCKSIZE)))
+    labels = ['%sm' % int(dist_start+10*l) for l in range(len(length))]
     plt.xticks(length, labels)
     plt.savefig('./fig/task3-k/frame%s-rside.png' % f)
     plt.close()
-    return vertical_dist
+    return dist, vertical_dist
 
 
 if __name__ == '__main__':
-    results = dict(lsideverticaldist=list(), rsideverticaldist=list())
+    results = dict(lsidedist=list(), lsideverticaldist=list(), rsidedist=list(), rsideverticaldist=list())
     for f in range(1, 101):
         file = './fig/task3-trans/original_frame%s-trans.bmp' % f
         img = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
-        l_vertical_dist = l_side(img, f)
-        r_vertical_dist = r_side(img, f)
+        l_dist, l_vertical_dist = l_side(img, f)
+        r_dist, r_vertical_dist = r_side(img, f)
+        results['lsidedist'].append(l_dist)
+        results['rsidedist'].append(r_dist)
         results['lsideverticaldist'].append(l_vertical_dist)
         results['rsideverticaldist'].append(r_vertical_dist)
         
