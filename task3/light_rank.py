@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-f = 1
+f = 100
 rank = 10
 file = './fig/task3-trans/original_frame%s-trans.bmp' % f
 img = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
